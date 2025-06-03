@@ -26,3 +26,4 @@ terraform.rc
 # Ignore .terraform.lock.hcl as it should be committed for production setups
 # *.terraform.lock.hcl
 
+.idea/
