@@ -72,19 +72,9 @@ resource "aws_iam_role_policy" "github_actions_policy" {
   })
 }
 
-# MuleSoft Anypoint CLI Parameters
-resource "aws_ssm_parameter" "anypoint_cli_ruleset_validation" {
-  name  = "/mulesoft/anypoint-cli/ruleset-validation"
-  type  = "StringList"
-  value = "ruleset,validate,--format json"
-  tags = {
-    Service = "MuleSoft"
-    Tool    = "Anypoint-CLI"
-  }
-}
-
+# MuleSoft Anypoint CLI Parameters for Governence Rulesets
 resource "aws_ssm_parameter" "anypoint_cli_mule_rulesets" {
-  name  = "/mulesoft/anypoint-cli/mule-rulesets"
+  name  = "/mulesoft/anypoint-cli/api-governence-rulesets/pearson-rulesets"
   type  = "StringList"
   value = "anypoint-cli-v4 api-mgr ruleset validate --remote-rulesets 68ef9520-24e9-4cf2-b2f5-620025690913/api-governance-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/best-practices-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/security-ruleset/1.0.1"
   tags = {
@@ -93,9 +83,8 @@ resource "aws_ssm_parameter" "anypoint_cli_mule_rulesets" {
   }
 }
 
-# Parameter Store - Anypoint CLI Ruleset Validation Command
 resource "aws_ssm_parameter" "anypoint_ruleset_validation" {
-  name        = "/mulesoft/anypoint-cli/ruleset-validation-command"
+  name        = "/mulesoft/anypoint-cli/api-governance-rulesets/mule-rulesets"
   description = "Anypoint CLI command for ruleset validation"
   type        = "StringList"
   value       = "anypoint-cli-v4 api-mgr ruleset validate --remote-rulesets 68ef9520-24e9-4cf2-b2f5-620025690913/api-governance-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/best-practices-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/security-ruleset/1.0.1"
@@ -112,7 +101,7 @@ resource "aws_ssm_parameter" "anypoint_ruleset_validation" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
-# Update IAM policy to include access to MuleSoft parameters
+# Update IAM policy to include access to MuleSoft ruleset fr parameter store
 resource "aws_iam_role_policy" "parameter_store_policy" {
   name = "parameter-store-policy"
   role = aws_iam_role.github_actions.id
