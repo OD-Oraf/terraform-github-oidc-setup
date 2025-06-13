@@ -12,10 +12,9 @@ This configuration creates the following AWS resources:
 - Configures a 7-day recovery window
 
 ### AWS Systems Manager Parameter Store
-- Creates three parameters for MuleSoft Anypoint CLI:
-  - `/mulesoft/anypoint-cli/ruleset-validation` (StringList)
-  - `/mulesoft/anypoint-cli/mule-rulesets` (StringList)
-  - `/mulesoft/anypoint-cli/ruleset-validation-command` (StringList)
+- Creates two SSM parameters for MuleSoft Anypoint CLI API-Governance rulesets:
+  - `/mulesoft/anypoint-cli/api-governance-rulesets/pearson-rulesets` (StringList)
+  - `/mulesoft/anypoint-cli/api-governance-rulesets/mule-rulesets` (StringList)
 - All parameters include appropriate tags
 
 ### GitHub OIDC Integration
@@ -80,7 +79,7 @@ To use these resources in a GitHub Actions workflow:
      run: aws secretsmanager get-secret-value --secret-id example-secret
    
    - name: Get parameter
-     run: aws ssm get-parameter --name "/mulesoft/anypoint-cli/ruleset-validation"
+     run: aws ssm get-parameter --name "/mulesoft/anypoint-cli/api-governance-rulesets/mule-rulesets"
    ```
 
 ## Security Considerations
