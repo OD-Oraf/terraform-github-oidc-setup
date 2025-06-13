@@ -101,7 +101,7 @@ resource "aws_ssm_parameter" "anypoint_ruleset_validation" {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
-# Update IAM policy to include access to MuleSoft ruleset fr parameter store
+# Update IAM policy to include access to MuleSoft ruleset for parameter store
 resource "aws_iam_role_policy" "parameter_store_policy" {
   name = "parameter-store-policy"
   role = aws_iam_role.github_actions.id
