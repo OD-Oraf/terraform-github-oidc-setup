@@ -3,6 +3,15 @@ provider "aws" {
   region = "us-east-1" # Change this to your desired region
 }
 
+# S3 Bucket to hold TF State File
+resource "aws_s3_bucket" "terraform_state_s3_bucket" {
+  bucket = "od-orafgithub-actions-terraform-state-bucket"
+
+  tags = {
+    Name = "github-actions-terraform-state"
+  }
+}
+
 # Create a secret in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "example_secret" {
   name                    = "example-secret"
@@ -21,8 +30,8 @@ resource "aws_secretsmanager_secret_version" "example_secret_version" {
 
 # Create the OIDC Provider for GitHub
 resource "aws_iam_openid_connect_provider" "github_oidc" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com", "sigstore"]
+  url = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com", "sigstore"]
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 }
 
@@ -72,7 +81,7 @@ resource "aws_iam_role_policy" "github_actions_policy" {
   })
 }
 
-# MuleSoft Anypoint CLI Parameters for Governence Rulesets
+# MuleSoft Anypoint CLI Parameters for Governance Rulesets
 resource "aws_ssm_parameter" "anypoint_cli_mule_rulesets" {
   name  = "/mulesoft/anypoint-cli/api-governence-rulesets/pearson-rulesets"
   type  = "StringList"
