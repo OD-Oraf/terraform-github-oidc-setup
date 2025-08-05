@@ -1,135 +1,31 @@
-# Configure AWS Provider
-provider "aws" {
-  region = "us-east-1" # Change this to your desired region
-}
+# Terraform GitHub OIDC Setup
+# Main entry point for the Terraform configuration
 
-# S3 Bucket to hold TF State File
-resource "aws_s3_bucket" "terraform_state_s3_bucket" {
-  bucket = "od-orafgithub-actions-terraform-state-bucket"
+# This file serves as the entry point for the Terraform configuration.
+# Resources are organized in separate files by their logical function:
+# - providers.tf: AWS provider configuration
+# - variables.tf: Input variables
+# - outputs.tf: Output values
+# - iam.tf: IAM roles and policies for GitHub OIDC
+# - secrets.tf: AWS Secrets Manager resources
+# - data.tf: Data sources
 
-  tags = {
-    Name = "github-actions-terraform-state"
+# Uncomment this block to configure S3 backend for remote state
+# terraform {
+#   backend "s3" {
+#     bucket = "od-orafgithub-actions-terraform-state-bucket"
+#     key    = "github-oidc/terraform.tfstate"
+#     region = "us-east-1"
+#   }
+# }
+
+# Uncomment this block to specify required Terraform and provider versions
+terraform {
+  required_version = ">= 1.0.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
   }
-}
-
-# Create a secret in AWS Secrets Manager
-resource "aws_secretsmanager_secret" "example_secret" {
-  name                    = "example-secret"
-  description             = "Example secret created by Terraform"
-  recovery_window_in_days = 7 # Optional: Number of days to wait before permanent deletion
-}
-
-# Create a version of the secret with the actual value
-resource "aws_secretsmanager_secret_version" "example_secret_version" {
-  secret_id = aws_secretsmanager_secret.example_secret.id
-  secret_string = jsonencode({
-    username = "example-secret"
-    password = "123456789"
-  })
-}
-
-# Create the OIDC Provider for GitHub
-resource "aws_iam_openid_connect_provider" "github_oidc" {
-  url = "https://token.actions.githubusercontent.com"
-  client_id_list = ["sts.amazonaws.com", "sigstore"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
-}
-
-# Create IAM Role for GitHub Actions
-resource "aws_iam_role" "github_actions" {
-  name = "github-actions-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = aws_iam_openid_connect_provider.github_oidc.arn
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringEquals = {
-            "token.actions.githubusercontent.com:aud" : "sts.amazonaws.com"
-          }
-          StringLike = {
-            "token.actions.githubusercontent.com:sub" : "repo:OD-Oraf/*"
-          }
-        }
-      }
-    ]
-  })
-}
-
-# Attach policy to the role (example with SecretsManager access)
-resource "aws_iam_role_policy" "github_actions_policy" {
-  name = "github-actions-policy"
-  role = aws_iam_role.github_actions.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ]
-        Resource = aws_secretsmanager_secret.example_secret.arn
-      }
-    ]
-  })
-}
-
-# MuleSoft Anypoint CLI Parameters for Governance Rulesets
-resource "aws_ssm_parameter" "anypoint_cli_mule_rulesets" {
-  name  = "/mulesoft/anypoint-cli/api-governence-rulesets/pearson-rulesets"
-  type  = "StringList"
-  value = "anypoint-cli-v4 api-mgr ruleset validate --remote-rulesets 68ef9520-24e9-4cf2-b2f5-620025690913/api-governance-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/best-practices-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/security-ruleset/1.0.1"
-  tags = {
-    Service = "MuleSoft"
-    Tool    = "Anypoint-CLI"
-  }
-}
-
-resource "aws_ssm_parameter" "anypoint_ruleset_validation" {
-  name        = "/mulesoft/anypoint-cli/api-governance-rulesets/mule-rulesets"
-  description = "Anypoint CLI command for ruleset validation"
-  type        = "StringList"
-  value       = "anypoint-cli-v4 api-mgr ruleset validate --remote-rulesets 68ef9520-24e9-4cf2-b2f5-620025690913/api-governance-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/best-practices-ruleset/1.0.1 68ef9520-24e9-4cf2-b2f5-620025690913/security-ruleset/1.0.1"
-  tier        = "Standard"
-
-  tags = {
-    Environment = "development"
-    Service     = "MuleSoft"
-    Tool        = "Anypoint-CLI"
-  }
-}
-
-# Get current AWS region and account details
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
-
-# Update IAM policy to include access to MuleSoft ruleset for parameter store
-resource "aws_iam_role_policy" "parameter_store_policy" {
-  name = "parameter-store-policy"
-  role = aws_iam_role.github_actions.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters",
-          "ssm:GetParametersByPath"
-        ]
-        Resource = [
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/example/*",
-          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/mulesoft/*"
-        ]
-      }
-    ]
-  })
 }
