@@ -2,6 +2,18 @@
 
 This Terraform configuration sets up infrastructure for securely accessing AWS Secrets Manager and Parameter Store from GitHub Actions workflows using OpenID Connect (OIDC) authentication.
 
+## Project Structure
+
+The project follows Terraform best practices with a modular file organization:
+
+- `main.tf` - Main entry point and configuration overview
+- `providers.tf` - AWS provider configuration
+- `variables.tf` - Input variable declarations
+- `outputs.tf` - Output value declarations
+- `iam.tf` - IAM roles and policies for GitHub OIDC
+- `secrets.tf` - AWS Secrets Manager and Parameter Store resources
+- `data.tf` - Data sources for AWS region and account ID
+
 ## Infrastructure Components
 
 This configuration creates the following AWS resources:
@@ -91,9 +103,9 @@ To use these resources in a GitHub Actions workflow:
 
 ## Customization
 
-- Change the AWS region in the provider block if needed
-- Update the secret values in the `aws_secretsmanager_secret_version` resource
-- Modify the repository pattern in the IAM role trust policy to match your organization
+- Change the AWS region in the `variables.tf` file
+- Update the secret values in the `secrets.tf` file
+- Modify the repository pattern in the `variables.tf` and `iam.tf` files to match your organization
 - Add or remove parameters as needed for your specific use case
 
 ## Cleanup
