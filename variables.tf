@@ -10,7 +10,7 @@ variable "github_repos" {
   default     = ["OD-Oraf/terraform-github-oidc-setup", "OD-Oraf/another-repo"]
 }
 
-variable "secret_name" {
+variable "example_name" {
   description = "Name of the secret in AWS Secrets Manager"
   type        = string
   default     = "example-secret"
