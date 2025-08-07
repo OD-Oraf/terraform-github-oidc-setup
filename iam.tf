@@ -45,7 +45,10 @@ resource "aws_iam_role_policy" "github_actions_policy" {
           "secretsmanager:GetSecretValue",
           "secretsmanager:DescribeSecret"
         ]
-        Resource = aws_secretsmanager_secret.example_secret.arn
+        Resource = [
+          aws_secretsmanager_secret.example_secret.arn,
+          "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:mule/gip/*"
+        ]
       }
     ]
   })
